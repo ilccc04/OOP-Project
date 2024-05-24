@@ -1,0 +1,294 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<iostream>
+#include<string>
+#include<cstring>
+
+using namespace std;
+
+enum Audienta { COPII = 0, ADULTI = 1 };
+
+class Carte {
+private:
+	const int idCarte;
+	string titlu;
+	char* autor;
+	static int detinatori;
+public:
+	Carte() :idCarte(++detinatori) {
+		this->titlu = "Necunoscut";
+		this->autor = nullptr;
+	}
+	Carte(const string& titlu) :idCarte(++detinatori) {
+		this->titlu = titlu;
+		if (this->autor != nullptr) {
+			this->autor = new char[strlen(autor) + 1];
+			strcpy(this->autor, autor);
+		}
+	}
+	Carte(const Carte& c) : idCarte(c.idCarte), titlu(c.titlu) {
+		if (c.autor != nullptr) {
+			this->autor = new char[strlen(c.autor) + 1];
+			strcpy(this->autor, c.autor);
+		}
+		else {
+			this->autor = nullptr;
+		}
+	}
+	Carte(const string& titlu, const char* autor) : idCarte(++detinatori), titlu(titlu) {
+		this->autor = new char[strlen(autor) + 1];
+		strcpy(this->autor, autor);
+	}
+	~Carte() {
+		delete[] this->autor;
+	}
+	const char* getAutor() const {
+		return (this->autor != nullptr) ? this->autor : "Necunoscut";
+	}
+	int getIdCarte() const {
+		return this->idCarte;
+	}
+
+	const string& getTitlu() const {
+		return this->titlu;
+	}
+	Carte& operator=(const Carte& c) {
+		if (this != &c) {
+			delete[] this->autor;
+			this->titlu = c.titlu;
+			this->detinatori = c.detinatori;
+
+			if (c.autor != nullptr) {
+				this->autor = new char[strlen(c.autor) + 1];
+				strcpy(this->autor, c.autor);
+			}
+			else {
+				this->autor = nullptr;
+			}
+		}
+		return *this;
+	}
+	friend ostream& operator<<(ostream& out, const Carte& carte) {
+		out << "ID Carte: " << carte.idCarte << endl;
+		out << "Titlu Carte: " << carte.titlu << endl;
+		out << "Autor Carte: " << carte.getAutor() << endl;
+		return out;
+	}
+};
+int Carte::detinatori = 0;
+class CarteVirtuala : public Carte {
+private:
+	const int paginiCitite;
+	int* cititoriActivi;
+	char* siteWeb;
+	bool esteCitita;
+	Audienta audienta;
+	float pret;
+	int nrCapitole;
+	string numeCititor;
+	char cuprins;
+public:
+	//constructoru default
+	CarteVirtuala() : Carte(), paginiCitite(0), cititoriActivi(nullptr), siteWeb(nullptr), esteCitita(false), audienta(COPII), pret(0.0f), nrCapitole(0), numeCititor("Necunoscut"), cuprins('\0') {
+	}
+	//constructorul cu 4 parametri
+	CarteVirtuala(const string& titlu, int paginiCitite, Audienta audienta, float pret)
+		: Carte(titlu), paginiCitite(paginiCitite), audienta(audienta), pret(pret), nrCapitole(0), numeCititor("Necunoscut"), siteWeb(nullptr), esteCitita(false), cititoriActivi(nullptr), cuprins('\0') {
+	}
+	//constructorul la alegere(cu toti parametrii)
+	CarteVirtuala(const string& titlu, const char* autor, const int paginiCitite, int* cititoriActivi, const char* siteWeb, bool esteCitita, Audienta audienta, float pret, int nrCapitole, const string& numeCititor, char cuprins)
+		: Carte(titlu, autor), paginiCitite(paginiCitite) {
+		this->esteCitita = esteCitita;
+		this->audienta = audienta;
+		this->pret = pret;
+		this->nrCapitole = nrCapitole;
+		this->numeCititor = numeCititor;
+		this->cuprins = cuprins;
+		if (siteWeb != nullptr) {
+			this->siteWeb = new char[strlen(siteWeb) + 1];
+			strcpy(this->siteWeb, siteWeb);
+		}
+		else {
+			this->siteWeb = nullptr;
+		}
+
+		if (paginiCitite > 0) {
+			this->cititoriActivi = new int[paginiCitite];
+			for (int i = 0; i < paginiCitite; i++) {
+				this->cititoriActivi[i] = cititoriActivi[i];
+			}
+		}
+		else {
+			this->cititoriActivi = nullptr;
+		}
+	}
+	//constructorul de copiere
+	CarteVirtuala(const CarteVirtuala& cv) : Carte(cv), paginiCitite(cv.paginiCitite) {
+		this->esteCitita = cv.esteCitita;
+		this->audienta = cv.audienta;
+		this->pret = cv.pret;
+		this->nrCapitole = cv.nrCapitole;
+		this->numeCititor = cv.numeCititor;
+		this->cuprins = cv.cuprins;
+		if (cv.cititoriActivi != nullptr) {
+			this->cititoriActivi = new int[cv.paginiCitite];
+			for (int i = 0; i < cv.paginiCitite; ++i) {
+				this->cititoriActivi[i] = cv.cititoriActivi[i];
+			}
+		}
+		else {
+			this->cititoriActivi = nullptr;
+		}
+		if (cv.siteWeb != nullptr) {
+			this->siteWeb = new char[strlen(cv.siteWeb) + 1];
+			strcpy(this->siteWeb, cv.siteWeb);
+		}
+		else {
+			this->siteWeb = nullptr;
+		}
+	}
+
+	//destructor
+	~CarteVirtuala() {
+		if (cititoriActivi != nullptr) {
+			delete[] cititoriActivi;
+		}
+		if (siteWeb != nullptr) {
+			delete[] siteWeb;
+		}
+	}
+	//operatorul =
+	CarteVirtuala& operator=(const CarteVirtuala& cv) {
+		if (this != &cv) {
+			this->esteCitita = cv.esteCitita;
+			this->audienta = cv.audienta;
+			this->pret = cv.pret;
+			this->nrCapitole = cv.nrCapitole;
+			this->numeCititor = cv.numeCititor;
+			this->cuprins = cv.cuprins;
+
+			delete[] this->siteWeb;
+			if (cv.siteWeb != nullptr) {
+				this->siteWeb = new char[strlen(cv.siteWeb) + 1];
+				strcpy(this->siteWeb, cv.siteWeb);
+			}
+			else {
+				this->siteWeb = nullptr;
+			}
+			delete[] this->cititoriActivi;
+			if (cv.paginiCitite != 0) {
+				this->cititoriActivi = new int[cv.paginiCitite];
+				for (int i = 0; i < cv.paginiCitite; i++) {
+					this->cititoriActivi[i] = cv.cititoriActivi[i];
+				}
+			}
+			else {
+				this->cititoriActivi = nullptr;
+			}
+		}
+		return *this;
+	}
+	//get si set pentru int*
+	int* getCititoriActivi() {
+		return this->cititoriActivi;
+	}
+	void setCitiroriActivi(int paginiCitite, int* cititori) {
+		if (paginiCitite > 0) {
+			delete[] this->cititoriActivi;
+			if (this->cititoriActivi != nullptr) {
+				delete[]this->cititoriActivi;
+			}
+			this->cititoriActivi = new int[paginiCitite];
+			for (int i = 0; i < paginiCitite; i++) {
+				this->cititoriActivi[i] = cititori[i];
+			}
+		}
+	}
+	//operator <=
+	bool operator<=(const CarteVirtuala& cartev)
+	{
+		return this->nrCapitole <= cartev.nrCapitole;
+	}
+	//operator *=
+	void operator*=(int multiplicator) {
+		this->nrCapitole *= multiplicator;
+	}
+	//operator >
+	bool operator>(const CarteVirtuala& cartev)
+	{
+		return this->nrCapitole > cartev.nrCapitole;
+	}
+	//operatorul negatie
+	bool operator!() {
+		return this->nrCapitole == 0;
+	}
+	//operatorul functie
+	int operator()(int capitolePlus) {
+		return this->nrCapitole + capitolePlus;
+	}
+	friend ostream& operator<<(ostream& out, const CarteVirtuala& cv);
+
+};
+//o metoda de afisare a tuturor atributelor, cu ajutorul operatorului <<
+ostream& operator<<(ostream& out, const CarteVirtuala& cv) {
+	out << endl << "Pagini citite: " << cv.paginiCitite;
+	out << endl << "Cititori activi: ";
+	if (cv.cititoriActivi != nullptr) {
+		for (int i = 0; i < cv.paginiCitite; i++) {
+			out << cv.cititoriActivi[i] << " ";
+		}
+	}
+	out << endl << "Site-ul web: ";
+	if (cv.siteWeb != nullptr) {
+		out << cv.siteWeb;
+	}
+	out << endl << "Este citita: " << (cv.esteCitita ? "Este citita." : "Nu este citita.");
+	out << endl << "Audienta: " << (cv.audienta == COPII ? "COPII" : "ADULTI");
+	out << endl << "Pretul este: " << cv.pret;
+	out << endl << "Numar de capitole: " << cv.nrCapitole;
+	out << endl << "Numele cititorului: " << cv.numeCititor;
+	out << endl << "Cuprins: " << cv.cuprins;
+	return out;
+}
+void main()
+{
+	// Constructorul default pentru CarteVirtuala
+	CarteVirtuala carte1;
+	cout << "CarteVirtuala 1:" << carte1;
+
+	// Constructorul cu 4 parametri pentru CarteVirtuala
+	CarteVirtuala carte2("Hobbit", 50, COPII, 37.99f);
+	cout << "CarteVirtuala 2:" << carte2;
+
+	// Constructorul cu toti parametrii pentru CarteVirtuala
+	int paginiCitite[] = { 15, 20, 32 };
+	const char* autor = "Gene Wolfe";
+	CarteVirtuala carte3("Vrajitorul", autor, 3, paginiCitite, "www.site.com", true, ADULTI, 14.99f, 5, "Cristina", 'A');
+	// Apelul operatorului de atribuire(=)
+	CarteVirtuala carte4 = carte3;
+	cout << "CarteVirtuala 4 (copie a CarteVirtuala 3):" << carte4;
+
+	// Testare metode get pentru Carte
+	cout << "ID Carte 3: " << carte3.getIdCarte() << endl;
+	cout << "Titlu Carte 3: " << carte3.getTitlu() << endl;
+	cout << "Autor Carte 3: " << carte3.getAutor() << endl;
+
+	// Testare metode get si set pentru CarteVirtuala
+	int* cititoriActiviNou = new int[3] { 4, 5, 6 };
+	carte3.setCitiroriActivi(3, cititoriActiviNou);
+
+	cout << "Cititori activi pentru Carte 3 dupa setare:" << endl;
+	int* cititoriActiviDupaSet = carte3.getCititoriActivi();
+	for (int i = 0; i < 3; ++i) {
+		cout << cititoriActiviDupaSet[i] << " ";
+	}
+	cout << endl;
+
+	// eliberarea memoriei alocate
+	delete[] cititoriActiviNou;
+
+	//apelarea operatorilor
+	cout << "Cartea 3 are mai multe sau la fel de multe capitole decat cartea 2 " << (carte2 <= carte3) << endl;
+	cout << "Cartea 2 are mai multe capitole decat cartea 3 " << (carte2 > carte3) << endl;
+	cout << "Apel operator negatie: " << !carte2 << endl;
+	cout << "Apel operator functie:  " << carte2(5) << endl;
+}
